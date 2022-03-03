@@ -3,3 +3,5 @@ node_modules/
 
 # WA-Verify Specific Ignores
 profileData/
+logs/
+.DS_Store

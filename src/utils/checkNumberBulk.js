@@ -1,38 +1,35 @@
 const puppeteer = require("puppeteer");
+const fs = require("fs");
+const WhatsAppVerificationService = require("../VerificationService/WhatsAppVerificationService");
+const logsDir = "./logs";
 
 async function checkNumberBulk(phoneNumbers) {
-	const browser = await puppeteer.launch({
-		headless: true,
-		userDataDir: "./profileData",
-	});
-	const results = [];
-	for (let i in phoneNumbers) {
-		const phoneNumber = phoneNumbers[i];
-		const page = await browser.newPage();
-		await page.setUserAgent(
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36"
-		); // To Make sure Mobile version of Whatsapp Web doesn't load, fixes headless issue
-		await page.setDefaultNavigationTimeout(0);
-		await page.goto(
-			`https://web.whatsapp.com/send?phone=${phoneNumber}&text&app_absent=0`,
-			{ waitUntil: "networkidle0" }
-		);
-		await page.waitForNavigation({
-			waitUntil: "networkidle2",
-		});
-		//await new Promise(r => setTimeout(r, 1000)); // Wait for page load - added for cases where networkidle doesn't
-		let numberExists = false;
-		if ((await page.$("#main")) !== null) numberExists = true;
-		results.push({
-			phoneNumber,
-			exists: numberExists,
-		});
-		await page.close();
-	}
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir);
+  }
 
-	await browser.close();
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      userDataDir: "./profileData",
+      args: ["--no-sandbox", "--disable-extensions"],
+    });
 
-	return results;
+    const VS = new WhatsAppVerificationService(browser, {
+      currentPosition: 0,
+      validateLength: 11,
+    });
+    const { results, currentPosition } = await VS.setNumbersList(phoneNumbers).validateList();
+
+    await browser.close();
+    fs.writeFileSync("./logs/results.json", JSON.stringify(results), {
+      encoding: "utf-8",
+    });
+
+    return results;
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 module.exports = checkNumberBulk;
