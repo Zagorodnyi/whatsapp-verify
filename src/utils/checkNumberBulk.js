@@ -16,8 +16,8 @@ async function checkNumberBulk(phoneNumbers) {
     });
 
     const VS = new WhatsAppVerificationService(browser, {
-      currentPosition: 0,
-      validateLength: 11,
+      currentPosition: 0, // Start position
+      validateLength: 11, // Required number length
     });
     const { results, currentPosition } = await VS.setNumbersList(phoneNumbers).validateList();
 

@@ -34,7 +34,6 @@ Check one Phone Number:
 npm run check 919898989898
 ```
 
-
 Check large list of numbers:
 
 Place your list in src/numbers/txt.
@@ -61,7 +60,18 @@ Run check script:
 npm run check:list
 ```
 
-You can find all results in 'logs' folder.
+**_Note_** You can specify number length in 'utils/checkNumberBulk.js line 20'.
+
+**_Note_** If process was failed for some reasons - the last checked number index will be loged in console. You can use it to set start position for the next check to skip already validated numbers.
+
+```
+ const VS = new WhatsAppVerificationService(browser, {
+      currentPosition: 0, // Start position
+      validateLength: 11, // Required number length
+    });
+```
+
+**_Note_** You can find all results in 'logs' folder.
 
 - "logs.txt" is a log file.
 - "tempResults.json" updating every successful check. Can be used to retrieve results when the process is not finished or exited with an error.
